@@ -1,5 +1,6 @@
 package org.fastboot.exception.template;
 
+import org.fastboot.common.utils.LogUtils;
 import org.fastboot.exception.common.AbstractExceptionTemplate;
 import org.fastboot.exception.common.ServiceException;
 import org.fastboot.exception.dto.ExceptionResultDto;
@@ -30,7 +31,7 @@ public class ServiceExceptionTemplate extends AbstractExceptionTemplate {
         exceptionResultDto.setCode(serviceException.getCode());
         exceptionResultDto.setMessage(serviceException.getMessage());
         exceptionResultDto.setStackMsg(Exceptions.getStackTraceAsString(exception));
-        LOGGER.info(exceptionResultDto.getStackMsg());
+        LogUtils.log(LOGGER, serviceException.getMessage(), exception);
         return exceptionResultDto;
     }
 

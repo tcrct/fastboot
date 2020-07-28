@@ -1,5 +1,6 @@
 package org.fastboot.exception.template;
 
+import org.fastboot.common.utils.LogUtils;
 import org.fastboot.exception.common.AbstractExceptionTemplate;
 import org.fastboot.exception.dto.ExceptionResultDto;
 import org.fastboot.exception.utils.Exceptions;
@@ -30,7 +31,7 @@ public class HttpMessageNotWritableExceptionTemplate extends AbstractExceptionTe
         exceptionResultDto.setCode(1);
         exceptionResultDto.setMessage("请确保Entity/Dto类已经正确设置get/set方法，异常信息: " + e.getMessage());
         exceptionResultDto.setStackMsg(Exceptions.getStackTraceAsString(exception));
-        LOGGER.info(exceptionResultDto.getStackMsg());
+        LogUtils.log(LOGGER, e.getMessage(), exception);
         return exceptionResultDto;
     }
 

@@ -34,15 +34,15 @@ public abstract class BaseEntity extends IdEntity {
     private Date updateTime;
 
     @Param(name = "记录来源", label = "记录来源", desc = "该记录的来源", isHidden = true)
-    private Integer source;
+    private String source;
 
     @Param(name = "记录状态", label = "记录状态", desc = "该记录的最新状态，1代表记录已经删除", isHidden = true)
-    private Integer status = 0;
+    private Integer status;
 
     public BaseEntity() {
     }
 
-    public BaseEntity(Serializable createUserId, Date createTime, Serializable updateUserId, Date updateTime, Integer source, Integer status) {
+    public BaseEntity(Serializable createUserId, Date createTime, Serializable updateUserId, Date updateTime, String source, Integer status) {
         this.createUserId = createUserId;
         this.createTime = createTime;
         this.updateUserId = updateUserId;
@@ -83,11 +83,11 @@ public abstract class BaseEntity extends IdEntity {
         this.updateTime = updateTime;
     }
 
-    public Integer getSource() {
+    public String getSource() {
         return source;
     }
 
-    public void setSource(Integer source) {
+    public void setSource(String source) {
         this.source = source;
     }
 

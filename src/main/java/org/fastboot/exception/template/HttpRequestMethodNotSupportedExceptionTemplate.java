@@ -1,5 +1,6 @@
 package org.fastboot.exception.template;
 
+import org.fastboot.common.utils.LogUtils;
 import org.fastboot.exception.common.AbstractExceptionTemplate;
 import org.fastboot.exception.dto.ExceptionResultDto;
 import org.fastboot.exception.utils.Exceptions;
@@ -29,7 +30,7 @@ public class HttpRequestMethodNotSupportedExceptionTemplate extends AbstractExce
         exceptionResultDto.setCode(1);
         exceptionResultDto.setMessage(e.getMessage());
         exceptionResultDto.setStackMsg(Exceptions.getStackTraceAsString(exception));
-        LOGGER.info(exceptionResultDto.getStackMsg());
+        LogUtils.log(LOGGER, e.getMessage(), exception);
         return exceptionResultDto;
     }
 

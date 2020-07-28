@@ -1,6 +1,8 @@
 package org.fastboot.exception.template;
 
 
+import org.fastboot.common.utils.LogUtils;
+import org.fastboot.common.utils.ToolsKit;
 import org.fastboot.exception.common.AbstractExceptionTemplate;
 import org.fastboot.exception.dto.ExceptionResultDto;
 import org.fastboot.exception.utils.Exceptions;
@@ -27,7 +29,6 @@ public class MethodArgumentNotValidExceptionTemplate extends AbstractExceptionTe
 
     @Override
     public ExceptionResultDto handle(Exception exception) {
-        LOGGER.info("方法参数验证异常");
         MethodArgumentNotValidException methodArgumentNotValidException = (MethodArgumentNotValidException) exception;
         StringBuilder exceptionStr = new StringBuilder();
         BindingResult bindingResult = methodArgumentNotValidException.getBindingResult();
@@ -40,12 +41,11 @@ public class MethodArgumentNotValidExceptionTemplate extends AbstractExceptionTe
                         .append("];");
             }
         }
-        System.out.println(exceptionStr);
         ExceptionResultDto exceptionResultDto =  new ExceptionResultDto();
         exceptionResultDto.setCode(1);
         exceptionResultDto.setMessage(exceptionStr.toString());
         exceptionResultDto.setStackMsg(Exceptions.getStackTraceAsString(exception));
-        LOGGER.info(exceptionResultDto.getStackMsg());
+        LogUtils.log(LOGGER, exceptionStr.toString(), exception);
         return exceptionResultDto;
     }
 }

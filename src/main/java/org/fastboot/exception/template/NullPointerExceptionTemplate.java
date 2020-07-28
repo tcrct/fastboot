@@ -1,5 +1,6 @@
 package org.fastboot.exception.template;
 
+import org.fastboot.common.utils.LogUtils;
 import org.fastboot.exception.common.AbstractExceptionTemplate;
 import org.fastboot.exception.dto.ExceptionResultDto;
 import org.fastboot.exception.utils.Exceptions;
@@ -29,7 +30,7 @@ public class NullPointerExceptionTemplate extends AbstractExceptionTemplate {
         exceptionResultDto.setCode(1);
         exceptionResultDto.setMessage("空指针异常");
         exceptionResultDto.setStackMsg(Exceptions.getStackTraceAsString(exception));
-        LOGGER.info(exceptionResultDto.getStackMsg());
+        LogUtils.log(LOGGER, nullPointerException.getMessage(), exception);
         return exceptionResultDto;
     }
 

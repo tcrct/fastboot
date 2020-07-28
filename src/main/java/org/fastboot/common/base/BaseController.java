@@ -232,7 +232,7 @@ public abstract class BaseController<T> {
     @RequestMapping(value = "/search",
             method = RequestMethod.POST,
             consumes = MediaType.ALL_VALUE,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public R search() {
         SearchListDto dto = getBean(SearchListDto.class);
         if (null == dto) {

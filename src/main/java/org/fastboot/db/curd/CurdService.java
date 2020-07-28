@@ -5,11 +5,15 @@ import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.SQLReady;
 import org.beetl.sql.core.db.TableDesc;
 import org.beetl.sql.core.query.Query;
+import org.fastboot.common.utils.LogUtils;
 import org.fastboot.db.dto.PageDto;
 import org.fastboot.db.dto.SearchListDto;
 import org.fastboot.db.model.BaseEntity;
 import org.fastboot.db.model.Update;
 import org.fastboot.db.utils.DbKit;
+import org.fastboot.exception.common.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -22,6 +26,8 @@ import java.util.List;
  * @since 1.0
  */
 public class CurdService<T> implements ICurdService<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CurdService.class);
 
     @Autowired
     private SQLManager manager;
@@ -67,14 +73,21 @@ public class CurdService<T> implements ICurdService<T> {
      */
     @Override
     public Integer save(T entity) {
-        BaseEntity baseEntity = (BaseEntity) entity;
-        if (null == baseEntity.getId() || "".equals(baseEntity.getId())) {
-           return manager.insert(getGenericTypeClass(), baseEntity);
-        } else {
-            String tableName = manager.getDbStyle().getNameConversion().getTableName(entity.getClass());
-            TableDesc tableDesc = manager.getMetaDataManager().getTable(tableName);
-            Update update = new Update(tableDesc.getName(), baseEntity);
-            return manager.executeUpdate(new SQLReady(update.getUpdateSql(), update.getParams().toArray()));
+        try {
+            BaseEntity baseEntity = (BaseEntity) entity;
+            if (null == baseEntity.getId() || "".equals(baseEntity.getId())) {
+                DbKit.addBaseEntityValue(baseEntity);
+                return manager.insert(getGenericTypeClass(), baseEntity);
+            } else {
+                String tableName = manager.getDbStyle().getNameConversion().getTableName(entity.getClass());
+                TableDesc tableDesc = manager.getMetaDataManager().getTable(tableName);
+                DbKit.updatBaseEntityValue(baseEntity);
+                Update update = new Update(tableDesc.getName(), baseEntity);
+                return manager.executeUpdate(new SQLReady(update.getUpdateSql(), update.getParams().toArray()));
+            }
+        } catch (Exception e) {
+            LogUtils.log(LOGGER, e.getMessage(), e);
+            throw new ServiceException(1, e.getMessage(), e);
         }
     }
 

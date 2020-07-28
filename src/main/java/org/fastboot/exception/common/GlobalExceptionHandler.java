@@ -40,8 +40,7 @@ public class GlobalExceptionHandler {
 
         if (null == resultDto) {
             resultDto = new ExceptionResultDto(1,
-                    "["+exception.getClass().getName()+"]为未处理的异常，请添加该异常的处理模板！",
-                    "");
+                    "["+exception.getClass().getName()+"]为未处理的异常，请添加该异常的处理模板！","");
         }
 
         return resultDto;

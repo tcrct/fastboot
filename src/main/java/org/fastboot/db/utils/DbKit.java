@@ -1,10 +1,15 @@
 package org.fastboot.db.utils;
 
+import org.aspectj.org.eclipse.jdt.core.IField;
+import org.beetl.core.om.ObjectUtil;
 import org.beetl.sql.core.query.Query;
 import org.fastboot.common.utils.LogUtils;
 import org.fastboot.db.dto.SearchDto;
 import org.fastboot.db.dto.SearchListDto;
 import org.fastboot.db.enums.OperatorEnum;
+import org.fastboot.db.enums.SourceEnum;
+import org.fastboot.db.enums.StatusEnum;
+import org.fastboot.db.model.BaseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,10 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -194,6 +196,50 @@ public class DbKit {
             }
         }
         return result;
+    }
+
+    /**
+     * 当新增entity时，填充默认值到entity
+     * @param baseEntity
+     */
+    public static void addBaseEntityValue(BaseEntity baseEntity) throws Exception {
+        Field[] fields = getFields(BaseEntity.class);
+        Date currentDate = new Date();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            Object value = field.get(baseEntity);
+            if (null == value) {
+                if (Date.class.equals(field.getType())) {
+                    value = currentDate;
+                }
+                String fieldName = field.getName();
+                if (BaseEntity.CREATEUSERID_FIELD.equals(fieldName) ||
+                        BaseEntity.UPDATEUSERID_FIELD.equals(fieldName)) {
+                    value = "0"; //默认为0号操作者
+                }
+                if (BaseEntity.STATUS_FIELD.equals(fieldName)) {
+                    value = StatusEnum.PASS.getSkey();
+                }
+                if (BaseEntity.SOURCE_FIELD.equals(fieldName)) {
+                    value = SourceEnum.CONSOLE.getSkey();
+                }
+                field.set(baseEntity, value);
+            }
+        }
+    }
+
+    /**
+     * 更新entity时，需要更新updateUserId 与 updateTime字段
+     * @param baseEntity
+     */
+    public static void updatBaseEntityValue(BaseEntity baseEntity) throws Exception{
+        Field updateTimeField = BaseEntity.class.getDeclaredField(BaseEntity.UPDATETIME_FIELD);
+        updateTimeField.setAccessible(true);
+        updateTimeField.set(baseEntity, new Date());
+
+        Field updateUserIdField = BaseEntity.class.getDeclaredField(BaseEntity.UPDATEUSERID_FIELD);
+        updateUserIdField.setAccessible(true);
+        updateUserIdField.set(baseEntity, "0");
     }
 
 }

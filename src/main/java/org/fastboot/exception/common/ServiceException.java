@@ -7,6 +7,7 @@ public class ServiceException extends RuntimeException {
 
     private Integer code;
     private String message;
+    private Throwable throwable;
 
     public ServiceException() {
         super();
@@ -18,6 +19,13 @@ public class ServiceException extends RuntimeException {
         this.message = message;
     }
 
+    public ServiceException(Integer code, String message, Throwable throwable) {
+        super(message, throwable);
+        this.code = code;
+        this.message = message;
+        this.throwable = throwable;
+    }
+
     public Integer getCode() {
         return code;
     }
@@ -25,5 +33,9 @@ public class ServiceException extends RuntimeException {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    public Throwable getThrowable() {
+        return throwable;
     }
 }
