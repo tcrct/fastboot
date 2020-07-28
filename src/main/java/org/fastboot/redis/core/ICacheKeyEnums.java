@@ -13,9 +13,21 @@ public interface ICacheKeyEnums {
      */
     int DEFAULT_TTL = 60*30;
     /**
+     * 1天
+     */
+    int ONE_DAY_TTL = DEFAULT_TTL * 2 * 24;
+    /**
+     * 1周
+     */
+    int ONE_WEEK_TTL = ONE_DAY_TTL * 7;
+    /**
+     * 1月
+     */
+    int ONE_MONTH_TTL = ONE_DAY_TTL * 30;
+    /**
      * 1年
      */
-    int ONE_YEAR_TTL = DEFAULT_TTL * 2 * 24 * 365;
+    int ONE_YEAR_TTL = ONE_DAY_TTL * 365;
     /**
      *  因为setex方法设置-1时会抛出异常， 所以设置成10年，当永不过期处理
      */

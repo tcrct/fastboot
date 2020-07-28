@@ -7,7 +7,7 @@ public interface ICurdCacheService<T> {
      * @param entity
      * @return
      */
-    int save(T entity);
+    Integer save(T entity);
 
     /**
      * 根据key值，查找缓存记录
@@ -21,6 +21,6 @@ public interface ICurdCacheService<T> {
      * @param key 缓存key
      * @return
      */
-    int deleteById(String key);
+    Integer deleteById(String key);
 
 }

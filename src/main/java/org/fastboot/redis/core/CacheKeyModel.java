@@ -1,6 +1,12 @@
 package org.fastboot.redis.core;
 
-
+/**
+ * 缓存key模型
+ * 用来确定每一个缓存的key或key前缀，过期时间等
+ *
+ * @author Laotang
+ * @since 1.0
+ */
 public class CacheKeyModel {
 
     /**

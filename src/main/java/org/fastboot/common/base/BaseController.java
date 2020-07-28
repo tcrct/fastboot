@@ -6,6 +6,7 @@ import cn.hutool.http.Header;
 import org.fastboot.common.dto.R;
 import org.fastboot.common.dto.ValidatorErrorDto;
 import org.fastboot.common.enums.ConstEnums;
+import org.fastboot.common.utils.LogUtils;
 import org.fastboot.common.utils.SpringKit;
 import org.fastboot.common.utils.ToolsKit;
 import org.fastboot.db.curd.ICurdService;
@@ -25,10 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -40,6 +39,10 @@ import java.util.Set;
 public abstract class BaseController<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseController.class);
+    /**
+     * 缓存Entity与对应的ICurdService
+     */
+    private static final Map<Class, ICurdService> CURD_SERVICE_MAP = new ConcurrentHashMap<>();
 
     @Autowired
     private Validator validator;
@@ -144,17 +147,34 @@ public abstract class BaseController<T> {
     private ICurdService<T> getCurdService() {
         try {
             Class<?> clazz = getGenericTypeClass();
+            ICurdService<T> curdService = CURD_SERVICE_MAP.get(clazz);
+            if (null != curdService) {
+                return curdService;
+            }
+            // 不存在则查找
             Object serviceImpl = SpringKit.getBeanByGenericType(clazz);
             if (ToolsKit.isEmpty(serviceImpl)) {
                 throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应ServiceImpl类，请检查！");
             }
-            ICurdService<T> curdService = (ICurdService<T>) serviceImpl;
-            if (null == curdService) {
-                throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应CurdService类，请检查！");
+
+            Class[] interfaceCls = serviceImpl.getClass().getInterfaces();
+            if (null== interfaceCls) {
+                throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应ServiceImpl类，该类没有实现ICurdService接口，请检查！");
             }
-            return curdService;
+            if (ICurdService.class.equals(interfaceCls[0])) {
+                curdService = (ICurdService<T>) serviceImpl;
+                if (null == curdService) {
+                    throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应CurdService类，请检查！");
+                }
+                CURD_SERVICE_MAP.put(clazz, curdService);
+                return curdService;
+            }
+           if (null == curdService) {
+               throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应CurdService类，请检查！");
+           }
+           return null;
         } catch (Exception e) {
-            LOGGER.warn("BaseController执行getCurdService方法时: " + e.getMessage(), e);
+            LogUtils.log(LOGGER,"BaseController执行getCurdService方法时: " + e.getMessage(), e);
             throw e;
         }
     }

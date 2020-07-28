@@ -9,7 +9,7 @@ package org.fastboot.redis.crud;
 public class CrudCacheService<T> implements ICurdCacheService<T> {
 
     @Override
-    public int save(T entity) {
+    public Integer save(T entity) {
         return 0;
     }
 
@@ -19,7 +19,7 @@ public class CrudCacheService<T> implements ICurdCacheService<T> {
     }
 
     @Override
-    public int deleteById(String key) {
+    public Integer deleteById(String key) {
         return 0;
     }
 }

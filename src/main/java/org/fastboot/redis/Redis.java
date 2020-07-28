@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.util.SafeEncoder;
 
 import java.util.*;
 
@@ -597,6 +598,9 @@ public class Redis {
             @Override
             public T execute(Jedis jedis) {
                 byte[] bytes = jedis.hget(serializerKey(model.getKey()),  serializerValue(field));
+                if(null != bytes) {
+                    expire(model);
+                }
                 return (T)deSerializeValue(bytes);
             }
         });
