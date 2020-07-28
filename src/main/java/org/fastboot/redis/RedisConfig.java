@@ -17,11 +17,11 @@ public class RedisConfig {
     /**端口*/
     private Integer port = null;
     /**链接超时*/
-    private Integer timeout = null;
+    private Integer timeout = 3000;
     /**密码*/
     private String password = null;
     /**数据库*/
-    private Integer database = null;
+    private Integer database = 0;
     /**名称*/
     private String clientName = null;
     /**kv值的序列化对象*/

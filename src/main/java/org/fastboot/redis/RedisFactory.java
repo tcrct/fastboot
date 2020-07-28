@@ -27,6 +27,16 @@ public class RedisFactory {
     private ISerializer serializer = null;
     private JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
 
+    public RedisFactory(RedisConfig config) {
+        this(config.getClientName(),
+                config.getHost(),
+                config.getPort(),
+                config.getTimeout(),
+                config.getPassword(),
+                config.getDatabase(),
+                config.getClientName());
+    }
+
     public RedisFactory(String cacheName, String host, int port) {
         this.cacheName = cacheName;
         this.host = host;
