@@ -8,6 +8,7 @@ import org.beetl.sql.core.query.Query;
 import org.fastboot.common.utils.LogUtils;
 import org.fastboot.common.utils.SettingKit;
 import org.fastboot.common.utils.SpringKit;
+import org.fastboot.common.utils.ToolsKit;
 import org.fastboot.db.dto.PageDto;
 import org.fastboot.db.dto.SearchListDto;
 import org.fastboot.db.model.BaseEntity;
@@ -51,6 +52,10 @@ public class CurdService<T> implements ICurdService<T> {
         return SettingKit.duang().key("cache.enable").defaultValue(true).getBoolean();
     }
 
+    private String getTableName() {
+        return manager.getDbStyle().getNameConversion().getTableName(getGenericTypeClass());
+    }
+
     private ICurdCacheService getCacheService() {
         try {
             Class<T> clazz = getGenericTypeClass();
@@ -59,7 +64,7 @@ public class CurdService<T> implements ICurdService<T> {
                 return curdCacheService;
             }
             // 不存在则查找
-            Object serviceImpl = SpringKit.getBeanByGenericType(clazz);
+            Object serviceImpl = SpringKit.getCacheBeanByGenericType(clazz);
             Class[] interfaceCls = serviceImpl.getClass().getInterfaces();
             if (null == interfaceCls) {
                 throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应CacheService类，该类没有实现ICurdCacheService接口，请检查！");
@@ -85,18 +90,30 @@ public class CurdService<T> implements ICurdService<T> {
 
     /**
      * 根据ID查找对象
-     * @param id id主键
+     * @param id 主键
      * @return
      */
     @Override
     public T findById(Serializable id) {
-        if (isCache()) {
-            T entity = (T)getCacheService().findById(id.toString());
+        T entity = null;
+        boolean isCache = isCache();
+        if (isCache) {
+            entity = (T)getCacheService().findById(id.toString());
             if (null != entity) {
-                return entity;
+                return ((BaseEntity)entity).getStatus() == 0 ? entity : null;
             }
         }
-        return manager.unique(getGenericTypeClass(), id);
+        StringBuilder findSql = new StringBuilder();
+        findSql.append("select * from `").append(getTableName()).append("` where ")
+                .append("`").append(BaseEntity.STATUS_FIELD).append("` = ? and ")
+                .append("`").append(IdEntity.ID_FIELD).append("` = ?");
+        List<T> dataList = manager.execute(new SQLReady(findSql.toString(), 0, id), getGenericTypeClass());
+        entity = ToolsKit.isEmpty(dataList) ? null : dataList.get(0);
+        if (isCache) {
+            getCacheService().save(entity);
+        }
+        return entity;
+//        return manager.unique(getGenericTypeClass(), id);
     }
 
     /**
@@ -106,14 +123,23 @@ public class CurdService<T> implements ICurdService<T> {
      */
     @Override
     public Integer deleteById(Serializable id) {
-        Object entity = ReflectUtil.newInstance(getGenericTypeClass());
-        ReflectUtil.setFieldValue(entity, BaseEntity.ID_FIELD, id);
-        //设置为逻辑删除
-        ReflectUtil.setFieldValue(entity, BaseEntity.STATUS_FIELD, 1);
-        if (isCache()) {
-            getCacheService().deleteById(id.toString());
+        try {
+            BaseEntity entity = (BaseEntity) ReflectUtil.newInstance(getGenericTypeClass());
+            ReflectUtil.setFieldValue(entity, BaseEntity.ID_FIELD, id);
+            //设置为逻辑删除
+            ReflectUtil.setFieldValue(entity, BaseEntity.STATUS_FIELD, 1);
+            if (isCache()) {
+                getCacheService().deleteById(id.toString());
+            }
+            String tableName = manager.getDbStyle().getNameConversion().getTableName(entity.getClass());
+            TableDesc tableDesc = manager.getMetaDataManager().getTable(tableName);
+            DbKit.updatBaseEntityValue(entity);
+            Update update = new Update(tableDesc.getName(), entity);
+            return manager.executeUpdate(new SQLReady(update.getUpdateSql(), update.getParams().toArray()));
+        } catch (Exception e) {
+            LogUtils.log(LOGGER, "根据ID删除记录时出错: " + e.getMessage(), e);
+            return 0;
         }
-        return save((T)entity);
     }
 
     /**
@@ -131,9 +157,10 @@ public class CurdService<T> implements ICurdService<T> {
             BaseEntity baseEntity = (BaseEntity) entity;
             if (null == baseEntity.getId() || "".equals(baseEntity.getId())) {
                 DbKit.addBaseEntityValue(baseEntity);
-                count =  manager.insert(getGenericTypeClass(), baseEntity);
+                // insert最后一个参数，代表需要返回自增id
+                count =  manager.insert(getGenericTypeClass(), baseEntity, true);
                 if (count > 0 && isCache()) {
-                    getCacheService().save(entity);
+                    getCacheService().save(baseEntity);
                 }
             } else {
                 String tableName = manager.getDbStyle().getNameConversion().getTableName(entity.getClass());
@@ -174,8 +201,10 @@ public class CurdService<T> implements ICurdService<T> {
                 query.groupBy(searchListDto.toGroupByStr());
             }
             query.limit(searchListDto.getPageNo(), searchListDto.getPageSize());
-            resultList = (null == searchListDto.getFieldList()) ? query.select() :
-                    query.select(searchListDto.getFieldList().toArray(new String[]{}));
+            resultList = query.select();
+            // todo... 由于指定多个列名时没有加上''号导致出错，暂注释掉，返回所有字段。待作者修复bug
+//            resultList = (null == searchListDto.getFieldList()) ? query.select() :
+//                    query.select(searchListDto.getFieldList().toArray(new String[]{}));
         }
         pageDto.setAutoCount(true);
         pageDto.setResult(resultList);

@@ -597,7 +597,7 @@ public class Redis {
         return call(new JedisAction<T>() {
             @Override
             public T execute(Jedis jedis) {
-                byte[] bytes = jedis.hget(serializerKey(model.getKey()),  serializerValue(field));
+                byte[] bytes = jedis.hget(serializerKey(model.getKey()),  serializerKey(field));
                 if(null != bytes) {
                     expire(model);
                 }

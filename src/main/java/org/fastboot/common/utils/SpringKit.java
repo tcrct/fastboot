@@ -1,6 +1,7 @@
 package org.fastboot.common.utils;
 
 import org.fastboot.db.curd.ICurdService;
+import org.fastboot.redis.crud.ICurdCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
@@ -34,20 +35,28 @@ public final class SpringKit implements BeanPostProcessor {
     private static final Map<Class<?>, Object> beanMap = new HashMap<>();
     /**ServiceImpl与泛型关系，key为泛型类，value为serviceImpl类，用于CURD*/
     private static final Map<Class<?>, Object> serviceGenericTypeBeanMap = new HashMap<>();
-
+    private static final Map<Class<?>, Object> cacheServiceGenericTypeBeanMap = new HashMap<>();
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
 //        System.out.println(bean.getClass()+"             "+beanName);
         Class<?> beanClass = bean.getClass();
         beanMap.put(beanClass, bean);
         Service serviceAnn = beanClass.getAnnotation(Service.class);
-        if (null != serviceAnn){
-            Class<?> genericTypeClass = ToolsKit.getSuperClassGenericType(beanClass, 0);
-            if (null == genericTypeClass || Object.class.equals(genericTypeClass)) {
-                LogUtils.log(LOGGER, "[{}]没有继承[{}]，不能自动生成CURD方法，请检查！",
-                        beanClass, ICurdService.class.getName());
+        if (null != serviceAnn) {
+            Class<?> genericTypeClass = null;
+            Class[] interfaces = beanClass.getInterfaces();
+            if (null != interfaces && interfaces.length>=1 &&
+                    ICurdCacheService.class.equals(interfaces[0])) {
+                genericTypeClass = ToolsKit.getSuperInterfaceGenericType(beanClass,0);
+                cacheServiceGenericTypeBeanMap.put(genericTypeClass, bean);
+            } else {
+                genericTypeClass = ToolsKit.getSuperClassGenericType(beanClass, 0);
+                if (null == genericTypeClass || Object.class.equals(genericTypeClass)) {
+                    LogUtils.log(LOGGER, "[{}]没有继承[{}]，不能自动生成CURD方法，请检查！",
+                            beanClass, ICurdService.class.getName());
+                }
+                serviceGenericTypeBeanMap.put(genericTypeClass, bean);
             }
-            serviceGenericTypeBeanMap.put(genericTypeClass, bean);
         }
 
 //        if (beanName.endsWith("Dao") && beanClass.getName().contains("$Proxy")) {
@@ -85,14 +94,14 @@ public final class SpringKit implements BeanPostProcessor {
 //        }
     }
 
-    /**
-     * 获取对象
-     *
-     * @param name
-     * @return Object 一个以所给名字注册的bean的实例
-     * @throws BeansException
-     *
-     */
+//    /**
+//     * 获取对象
+//     *
+//     * @param name
+//     * @return Object 一个以所给名字注册的bean的实例
+//     * @throws BeansException
+//     *
+//     */
     @SuppressWarnings("unchecked")
 //    public static <T> T getBean(String name) throws BeansException {
 //        return (T) beanFactory.getBean(name);
@@ -121,6 +130,12 @@ public final class SpringKit implements BeanPostProcessor {
     public static <T> T getBeanByGenericType(Class<T> clz) throws BeansException {
         return (T) serviceGenericTypeBeanMap.get(clz);
     }
+
+    public static <T> T getCacheBeanByGenericType(Class<T> clz) throws BeansException {
+        return (T) cacheServiceGenericTypeBeanMap.get(clz);
+    }
+
+
 
     /**
      * 如果BeanFactory包含一个与所给名称匹配的bean定义，则返回true

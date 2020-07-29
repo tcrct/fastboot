@@ -29,7 +29,7 @@ public enum  OperatorEnum {
 //    public static final String ELEMMATCH = "$elemMatch";
 
     ID("_id", "id","主键ID字段名称"),
-    EQ("$eq","=", "等于"),
+    EQ("$eq","==", "等于"),
     NE("$ne", "<>", "不等于"),
     NE2("$ne", "!=", "不等于"),
     GT("$gt",">", "大于"),

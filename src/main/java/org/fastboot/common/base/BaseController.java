@@ -157,7 +157,7 @@ public abstract class BaseController<T> {
                 throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应ServiceImpl类，请检查！");
             }
 
-            Class[] interfaceCls = serviceImpl.getClass().getInterfaces();
+            Class<?>[] interfaceCls = serviceImpl.getClass().getSuperclass().getInterfaces();
             if (null== interfaceCls) {
                 throw new NullPointerException("根据泛型[" + clazz.getName() + "]没有找到对应ServiceImpl类，该类没有实现ICurdService接口，请检查！");
             }

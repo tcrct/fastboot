@@ -12,13 +12,13 @@ public class IdEntity implements Serializable {
 
     public final static String ID_FIELD = "id";
 
-    private Serializable id;
+    private Integer id;
 
-    public Serializable getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Serializable id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 }
