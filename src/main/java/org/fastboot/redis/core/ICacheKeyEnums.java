@@ -40,7 +40,6 @@ public interface ICacheKeyEnums {
 
     /**
      * 取出缓存Key的有效时间,秒作单位
-     * @return
      */
     int getKeyTTL();
 

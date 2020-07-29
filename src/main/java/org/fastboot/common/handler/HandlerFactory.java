@@ -7,6 +7,7 @@ import cn.hutool.setting.SettingUtil;
 import org.fastboot.common.annotation.Handler;
 import org.fastboot.common.utils.LogUtils;
 import org.fastboot.common.utils.ToolsKit;
+import org.fastboot.exception.common.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,6 @@ public class HandlerFactory {
      */
     private static boolean isScanHandlerClass;
 
-    static {
-        HANDLERS.add(new InitDuangHandler());
-    }
-
     /**
      * @param request
      * @param response
@@ -44,17 +41,13 @@ public class HandlerFactory {
      */
     public static boolean handler(HttpServletRequest request, HttpServletResponse response) {
 
-        if (isScanHandlerClass) {
-            LogUtils.log(LOGGER,"系统中没有存在自定义的处理器，返回true，以继续往下执行代码！");
-            return true;
-        }
-
-        if (HANDLERS.isEmpty()) {
+        if (!isScanHandlerClass && HANDLERS.isEmpty()) {
+            HANDLERS.add(new InitDuangHandler());
             initHandler();
             isScanHandlerClass = true;
         }
 
-        if (HANDLERS.isEmpty()) {
+        if (!isScanHandlerClass) {
             LogUtils.log(LOGGER,"系统中没有存在自定义的处理器，返回true，继续往下执行代码！");
             return true;
         }
@@ -69,8 +62,8 @@ public class HandlerFactory {
             }
             return true;
         } catch (Exception e) {
-            LogUtils.log(LOGGER,"执行自定义的请求拦截处理器[{}]时抛出异常: {}", handler.getClass().getName(), e.getMessage());
-            return false;
+            LogUtils.log(LOGGER,"执行自定义的请求拦截处理器[{}]时抛出异常: {}", handler.getClass().getName(), e.getMessage(), e);
+            throw new ServiceException(5500, e.getMessage());
         }
     }
 
@@ -109,6 +102,7 @@ public class HandlerFactory {
             if(!handlerTreeMap.isEmpty()) {
                 HANDLERS.addAll(handlerTreeMap.values());
             }
+            System.out.println(HANDLERS);
         } catch (Exception e) {
             LOGGER.warn("初始化请求拦截处理器时出错: {}，清空HANDLERS集合后退出", e.getMessage(), e);
             HANDLERS.clear();

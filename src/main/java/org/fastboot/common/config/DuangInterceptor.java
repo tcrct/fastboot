@@ -1,5 +1,6 @@
 package org.fastboot.common.config;
 
+import org.fastboot.common.dto.HeadDto;
 import org.fastboot.common.dto.R;
 import org.fastboot.common.handler.HandlerFactory;
 import org.fastboot.common.utils.LogUtils;
@@ -8,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +25,8 @@ import javax.servlet.http.HttpServletResponse;
  * @author Laotang
  * @since 1.0
  */
-public class DuangInterceptor implements HandlerInterceptor {
+@Component
+public class DuangInterceptor extends HandlerInterceptorAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DuangInterceptor.class);
 
@@ -41,7 +45,7 @@ public class DuangInterceptor implements HandlerInterceptor {
         try {
             return HandlerFactory.handler(request, response);
         } catch (Exception e) {
-            LOGGER.warn("框架在执行拦截器时出错: {}", e.getMessage(), e);
+            LogUtils.log(LOGGER, "框架在执行拦截器时出错: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -69,12 +73,12 @@ public class DuangInterceptor implements HandlerInterceptor {
                     System.out.println(methodParameter.getParameter());
                 }
             }
-            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getMethod().getName());
-            LogUtils.log(LOGGER,"当前拦截的方法参数长度为：{}",handlerMethod.getMethod().getParameters().length);
-            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getBean().getClass().getName());
-            LogUtils.log(LOGGER,"开始拦截---------");
-            String uri = request.getRequestURI();
-            LogUtils.log(LOGGER,"拦截的uri："+uri);
+//            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getMethod().getName());
+//            LogUtils.log(LOGGER,"当前拦截的方法参数长度为：{}",handlerMethod.getMethod().getParameters().length);
+//            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getBean().getClass().getName());
+//            LogUtils.log(LOGGER,"开始拦截---------");
+//            String uri = request.getRequestURI();
+//            LogUtils.log(LOGGER,"拦截的uri："+uri);
         }
 
     }
@@ -82,41 +86,44 @@ public class DuangInterceptor implements HandlerInterceptor {
 
     /**
      * 整个请求处理完毕回调方法，即在视图渲染完毕时调用。
+     * 前置条件返回false或处理完成时调用。可获取响应数据及异常信息。
+     *
      * @param request   请求对象
      * @param response 返回对象
      * @param handler 处理器
      * @param ex
      * @throws Exception
      */
+
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
-//        System.out.println(response.getTrailerFields());
-//        if(handler instanceof HandlerMethod){
-//            HandlerMethod handlerMethod = (HandlerMethod) handler;
-//            System.out.println(handlerMethod.getBean());
-//            System.out.println(handlerMethod.getReturnType());
-//            MethodParameter[] methodParameters = handlerMethod.getMethodParameters();
-//            for (MethodParameter methodParameter : methodParameters) {
-//                Class clazz = methodParameter.getParameterType();
-//                if (ClassUtils.isAssignable(R.class, clazz)) {
-//                    System.out.println(methodParameter.getParameter());
-//                }
-//            }
-//            HeadDto headDto = ToolsKit.getThreadLocalDto();
-//            System.out.println("@@@@@@@@@@@: " + handlerMethod);
-//            if (headDto.getUri().equalsIgnoreCase(request.getRequestURI())) {
-//                headDto.setCode(1);
-//                // 服务器业务处理执行时间(毫秒)
-//                headDto.setProcessTime(System.currentTimeMillis() - headDto.getStartTime());
-//                // 移除
-//                ToolsKit.removeThreadLocalDto();
-//            }
-//            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getMethod().getName());
-//            LogUtils.log(LOGGER,"当前拦截的方法参数长度为：{}",handlerMethod.getMethod().getParameters().length);
-//            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getBean().getClass().getName());
-//            LogUtils.log(LOGGER,"开始拦截---------");
-//            String uri = request.getRequestURI();
-//            LogUtils.log(LOGGER,"拦截的uri："+uri);
-//        }
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,@Nullable Exception ex) throws Exception {
+        System.out.println("###############:" + response.getTrailerFields());
+        if(handler instanceof HandlerMethod){
+            HandlerMethod handlerMethod = (HandlerMethod) handler;
+            System.out.println(handlerMethod.getBean());
+            System.out.println(handlerMethod.getReturnType());
+            MethodParameter[] methodParameters = handlerMethod.getMethodParameters();
+            for (MethodParameter methodParameter : methodParameters) {
+                Class clazz = methodParameter.getParameterType();
+                if (ClassUtils.isAssignable(R.class, clazz)) {
+                    System.out.println(methodParameter.getParameter());
+                }
+            }
+            HeadDto headDto = ToolsKit.getThreadLocalDto();
+            System.out.println("@@@@@@@@@@@: " + handlerMethod);
+            if (headDto.getUri().equalsIgnoreCase(request.getRequestURI())) {
+                headDto.setCode(1);
+                // 服务器业务处理执行时间(毫秒)
+                headDto.setProcessTime(System.currentTimeMillis() - headDto.getStartTime());
+                // 移除
+                ToolsKit.removeThreadLocalDto();
+            }
+            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getMethod().getName());
+            LogUtils.log(LOGGER,"当前拦截的方法参数长度为：{}",handlerMethod.getMethod().getParameters().length);
+            LogUtils.log(LOGGER,"当前拦截的方法为：{}",handlerMethod.getBean().getClass().getName());
+            LogUtils.log(LOGGER,"开始拦截---------");
+            String uri = request.getRequestURI();
+            LogUtils.log(LOGGER,"拦截的uri："+uri);
+        }
     }
 }

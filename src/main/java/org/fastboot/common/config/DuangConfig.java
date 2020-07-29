@@ -26,6 +26,7 @@ import java.util.List;
  * @since 1.0
  */
 @Configuration
+@EnableWebMvc
 public class DuangConfig implements WebMvcConfigurer {
 
 
@@ -105,6 +106,7 @@ public class DuangConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new DuangInterceptor()).addPathPatterns("/**");
+//        registry.addInterceptor(new DuangInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
     }
 
 

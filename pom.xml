@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.1.RELEASE</version>
+        <version>2.3.2.RELEASE</version>
     </parent>
 
     <groupId>org.fastboot</groupId>
@@ -24,7 +24,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <skipTests>true</skipTests>
-        <spring.version>5.2.7.RELEASE</spring.version>
+        <spring.version>5.2.8.RELEASE</spring.version>
         <hutool.version>5.3.5</hutool.version>
         <fastboot.version>1.0-SNAPSHOT</fastboot.version>
         <unit.version>4.11</unit.version>

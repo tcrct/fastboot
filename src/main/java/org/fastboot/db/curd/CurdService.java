@@ -33,13 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Laotang
  * @since 1.0
  */
-public class CurdService<T> implements ICurdService<T> {
+public abstract class CurdService<T> implements ICurdService<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CurdService.class);
     private static final Map<Class, ICurdCacheService> CURD_CACHE_SERVICE_MAP = new ConcurrentHashMap<>();
 
     @Autowired
-    private SQLManager manager;
+    protected SQLManager manager;
 
     /** 取泛型对象类型
      * @return
@@ -157,7 +157,7 @@ public class CurdService<T> implements ICurdService<T> {
             BaseEntity baseEntity = (BaseEntity) entity;
             if (null == baseEntity.getId() || "".equals(baseEntity.getId())) {
                 DbKit.addBaseEntityValue(baseEntity);
-                // insert最后一个参数，代表需要返回自增id
+                // insert方法最后一个参数，代表需要返回自增id，会通过反射调用setId的方式设置值，执行完后，baseEntity里的id会被填充上最新的ID值
                 count =  manager.insert(getGenericTypeClass(), baseEntity, true);
                 if (count > 0 && isCache()) {
                     getCacheService().save(baseEntity);
