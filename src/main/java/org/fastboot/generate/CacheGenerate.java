@@ -28,10 +28,10 @@ public class CacheGenerate {
     private void getFileName(String className) {
         String classLowerName = className.toLowerCase();
         if (classLowerName.endsWith("entity")) {
-            this.fileName = className.replace("entity", "");
+            this.fileName = className.replace("Entity", "");
         }
         else if (classLowerName.endsWith("dto")) {
-            this.fileName = className.replace("dto", "");
+            this.fileName = className.replace("Dto", "");
         } else {
             this.fileName = className;
         }
@@ -56,18 +56,18 @@ public class CacheGenerate {
     private String builderImport() {
         StringBuilder importStr = new StringBuilder();
         importStr.append("\n\n");
-        importStr.append("import org.fastboot.common.utils.ToolsKit;").append("\n");
         importStr.append("import org.fastboot.redis.RedisFactory;").append("\n");
         importStr.append("import org.fastboot.redis.core.CacheKeyModel;").append("\n");
         importStr.append("import org.fastboot.redis.crud.ICurdCacheService;").append("\n");
         importStr.append("import org.springframework.stereotype.Service;").append("\n");
+        importStr.append("import ").append(basePackage).append(".cache.enums.").append(fileName).append("CacheKeyEnum;").append("\n");
         importStr.append("import ").append(beanClass.getName()).append(";\n\n");
         return importStr.toString();
     }
     private String builderBody() {
         StringBuilder bodyStr = new StringBuilder();
         bodyStr.append("/**").append("\n");
-        bodyStr.append("* ").append("\n");
+        bodyStr.append("* ").append(fileName).append("\n");
         bodyStr.append("*").append("\n");
         bodyStr.append("* @author zat").append("\n");
         bodyStr.append("* @since 1.0").append("\n");

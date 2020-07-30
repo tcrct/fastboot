@@ -24,10 +24,10 @@ public class DaoGenerate {
     private void getFileName(String className) {
         String classLowerName = className.toLowerCase();
         if (classLowerName.endsWith("entity")) {
-            this.fileName = className.replace("entity", "");
+            this.fileName = className.replace("Entity", "");
         }
         else if (classLowerName.endsWith("dto")) {
-            this.fileName = className.replace("dto", "");
+            this.fileName = className.replace("Dto", "");
         } else {
             this.fileName = className;
         }
@@ -59,7 +59,7 @@ public class DaoGenerate {
     private String builderBody() {
         StringBuilder bodyStr = new StringBuilder();
         bodyStr.append("/**").append("\n");
-        bodyStr.append("* ").append("\n");
+        bodyStr.append("* ").append(fileName).append("\n");
         bodyStr.append("*").append("\n");
         bodyStr.append("* @author zat").append("\n");
         bodyStr.append("* @since 1.0").append("\n");

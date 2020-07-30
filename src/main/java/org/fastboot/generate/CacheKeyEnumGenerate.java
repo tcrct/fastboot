@@ -15,7 +15,7 @@ public class CacheKeyEnumGenerate {
 
     public CacheKeyEnumGenerate(String basePackage, String path, Class<?> beanClass) {
         this.basePackage = basePackage;
-        this.path = path;
+        this.path = path+File.separator+"enums";
         this.beanClass = beanClass;
         simpleName = beanClass.getSimpleName();
         getFileName(beanClass.getSimpleName());
@@ -24,10 +24,10 @@ public class CacheKeyEnumGenerate {
     private void getFileName(String className) {
         String classLowerName = className.toLowerCase();
         if (classLowerName.endsWith("entity")) {
-            this.fileName = className.replace("entity", "");
+            this.fileName = className.replace("Entity", "");
         }
         else if (classLowerName.endsWith("dto")) {
-            this.fileName = className.replace("dto", "");
+            this.fileName = className.replace("Dto", "");
         } else {
             this.fileName = className;
         }
@@ -52,7 +52,7 @@ public class CacheKeyEnumGenerate {
     private String builderImport() {
         StringBuilder importStr = new StringBuilder();
         importStr.append("\n\n");
-        importStr.append("import org.fastboot.redis.core.ICacheKeyEnums;").append("\n");
+        importStr.append("import org.fastboot.redis.core.ICacheKeyEnums;").append("\n\n");
         return importStr.toString();
     }
     private String builderBody() {
@@ -62,10 +62,9 @@ public class CacheKeyEnumGenerate {
         bodyStr.append("*").append("\n");
         bodyStr.append("* @author zat").append("\n");
         bodyStr.append("* @since 1.0").append("\n");
-        bodyStr.append("*").append("\n");
         bodyStr.append("*/").append("\n");
-        bodyStr.append("public enum ").append(fileName).append("CacheKeyEnum implements ICacheKeyEnums {").append("\n");
-        bodyStr.append("\t").append("HSET_KEY(\"mpay:xxx:xxxx:\", ICacheKeyEnums.ONE_DAY_TTL, \"记录缓存到hset的key\"),").append("\n\n");
+        bodyStr.append("public enum ").append(fileName).append("CacheKeyEnum implements ICacheKeyEnums {").append("\n\n");
+        bodyStr.append("\t").append("HSET_KEY(\"mpay:模块名:实体名:\", ICacheKeyEnums.ONE_DAY_TTL, \"记录缓存到hset的key\"),").append("\n\n");
         bodyStr.append("\t;").append("\n");
         bodyStr.append("\tprivate String keyPrefix;\n")
                 .append("\tprivate int  ttl;\n")

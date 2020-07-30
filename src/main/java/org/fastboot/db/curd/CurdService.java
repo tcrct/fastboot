@@ -5,6 +5,7 @@ import org.beetl.sql.core.SQLManager;
 import org.beetl.sql.core.SQLReady;
 import org.beetl.sql.core.db.TableDesc;
 import org.beetl.sql.core.query.Query;
+import org.fastboot.common.dto.ValidatorErrorDto;
 import org.fastboot.common.utils.LogUtils;
 import org.fastboot.common.utils.SettingKit;
 import org.fastboot.common.utils.SpringKit;
@@ -20,11 +21,12 @@ import org.fastboot.redis.crud.ICurdCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -40,6 +42,8 @@ public abstract class CurdService<T> implements ICurdService<T> {
 
     @Autowired
     protected SQLManager manager;
+    @Autowired
+    private Validator validator;
 
     /** 取泛型对象类型
      * @return
@@ -153,6 +157,14 @@ public abstract class CurdService<T> implements ICurdService<T> {
     @Override
     public Integer save(T entity) {
         try {
+            Set<ConstraintViolation<T>> violationSet = validator.validate(entity);
+            if (ToolsKit.isNotEmpty(violationSet)) {
+                List<ValidatorErrorDto> validatorErrorDtoList = new ArrayList<>();
+                for (ConstraintViolation<T> model : violationSet) {
+                    validatorErrorDtoList.add(new ValidatorErrorDto(model.getPropertyPath().toString(), model.getMessage()));
+                }
+                throw new ServiceException(1001, ToolsKit.toJsonString(validatorErrorDtoList));
+            }
             int count = 0;
             BaseEntity baseEntity = (BaseEntity) entity;
             if (null == baseEntity.getId() || "".equals(baseEntity.getId())) {

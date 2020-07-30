@@ -38,6 +38,12 @@ public class GenerateKit {
         this.clazz = clazz;
         return this;
     }
+
+    public GenerateKit baseDir(String baseDir) {
+        this.baseDir = baseDir;
+        return this;
+    }
+
     public GenerateKit basePackage(String basePackage) {
         this.basePackage = basePackage;
         return this;
@@ -48,17 +54,16 @@ public class GenerateKit {
         if (ToolsKit.isEmpty(clazz)) {
             throw new NullPointerException("dto or entity class is not null");
         }
-        try {
-            String rootClassPath = clazz.getClassLoader().getResource("").toURI().getPath();
-            File rootDir = new File(rootClassPath);
-            baseDir = rootDir.getParentFile().getParentFile().getAbsolutePath();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            String rootClassPath = clazz.getClassLoader().getResource("").toURI().getPath();
+//            File rootDir = new File(rootClassPath);
+//            baseDir = rootDir.getParentFile().getParentFile().getAbsolutePath();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         controllerDir = buildSubDir("controller");
         serviceDir = buildSubDir("service");
         cacheDir = buildSubDir("cache");
-        cacheKeyEnumDir = buildSubDir("cache"+File.separator+"enums");
         daoDir = buildSubDir("dao");
         dtoDir = buildSubDir("dto");
 
@@ -66,6 +71,9 @@ public class GenerateKit {
 
     private String buildSubDir(String subDirName) {
         StringBuilder sb = new StringBuilder();
+        if (baseDir.endsWith("/") || baseDir.endsWith("\\") || baseDir.endsWith(File.separator)) {
+            baseDir = baseDir.substring(0, baseDir.length()-1);
+        }
         sb.append(baseDir).append(File.separator).append(subDirName).append(File.separator)
                 .append("src").append(File.separator).append("main").append(File.separator).append("java")
         .append(File.separator).append(basePackage.replace(".", File.separator)).append(File.separator)
@@ -75,13 +83,11 @@ public class GenerateKit {
 
     public void run() {
         buildSubDir();
-//        String className = clazz.getSimpleName();
-//        new ControllerGenerate(basePackage, controllerDir, clazz).gen();
-//        new ServiceGenerate(basePackage, serviceDir, clazz).gen();
-//        new DaoGenerate(basePackage, serviceDir, clazz).gen();
-//        new CacheGenerate(basePackage, serviceDir, clazz).gen();
-        new CacheKeyEnumGenerate(basePackage, cacheKeyEnumDir, clazz).gen();
-//        CacheGenerate cacheGenerate = new CacheGenerate();
+        new ControllerGenerate(basePackage, controllerDir, clazz).gen();
+        new ServiceGenerate(basePackage, serviceDir, clazz).gen();
+        new DaoGenerate(basePackage, daoDir, clazz).gen();
+        new CacheGenerate(basePackage, cacheDir, clazz).gen();
+        new CacheKeyEnumGenerate(basePackage, cacheDir, clazz).gen();
     }
 
     public static void main(String[] args) {

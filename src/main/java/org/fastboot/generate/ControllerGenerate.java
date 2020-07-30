@@ -24,10 +24,10 @@ public class ControllerGenerate {
     private void getFileName(String className) {
         String classLowerName = className.toLowerCase();
         if (classLowerName.endsWith("entity")) {
-            this.fileName = className.replace("entity", "");
+            this.fileName = className.replace("Entity", "");
         }
         else if (classLowerName.endsWith("dto")) {
-            this.fileName = className.replace("dto", "");
+            this.fileName = className.replace("Dto", "");
         } else {
             this.fileName = className;
         }
@@ -35,8 +35,6 @@ public class ControllerGenerate {
     }
 
     public void gen() {
-        System.out.println(path);
-        System.out.println(fileName);
         body.append(builderPackage())
         .append(builderImport())
         .append(builderBody());
@@ -55,6 +53,8 @@ public class ControllerGenerate {
         StringBuilder importStr = new StringBuilder();
         importStr.append("\n\n");
         importStr.append("import org.fastboot.common.base.BaseController;").append("\n");
+        importStr.append("import org.fastboot.common.dto.R;").append("\n");
+        importStr.append("import ").append(basePackage+".service.").append(fileName).append("Service;").append("\n");
         importStr.append("import org.springframework.beans.factory.annotation.Autowired;").append("\n");
         importStr.append("import org.springframework.http.MediaType;").append("\n");
         importStr.append("import org.springframework.stereotype.Controller;").append("\n");
@@ -67,7 +67,7 @@ public class ControllerGenerate {
         StringBuilder bodyStr = new StringBuilder();
 
         bodyStr.append("/**").append("\n");
-        bodyStr.append("* ").append("\n");
+        bodyStr.append("* ").append(fileName).append("\n");
         bodyStr.append("*").append("\n");
         bodyStr.append("* @author zat").append("\n");
         bodyStr.append("* @since 1.0").append("\n");
@@ -78,13 +78,13 @@ public class ControllerGenerate {
         bodyStr.append("public class ").append(fileName).append("Controller extends BaseController<").append(simpleName).append("> {").append("\n");
         bodyStr.append("\n");
         bodyStr.append("\t@Autowired").append("\n");
-        bodyStr.append("\tprivate ").append(fileName).append("Service ").append(simpleName.toLowerCase()).append("Service;").append("\n");
+        bodyStr.append("\tprivate ").append(fileName).append("Service ").append(fileName.toLowerCase()).append("Service;").append("\n");
         bodyStr.append("\n");
         bodyStr.append("\t@RequestMapping(value = ").append("\"/demo\"").append(",  method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)").append("\n");
         bodyStr.append("\t@ResponseBody").append("\n");
-        bodyStr.append("\tpublic String demo(@Validated @RequestBody ").append(simpleName).append(" dto) {").append("\n");
+        bodyStr.append("\tpublic R demo(@Validated @RequestBody ").append(simpleName).append(" dto) {").append("\n");
         bodyStr.append("\t\t").append("try {").append("\n");
-        bodyStr.append("\t\t\t").append("return R.success(").append(simpleName.toLowerCase()).append("Service.demo(dto));").append("\n");
+        bodyStr.append("\t\t\t").append("return R.success(").append(fileName.toLowerCase()).append("Service.demo(dto));").append("\n");
         bodyStr.append("\t\t").append("} catch (Exception e) {").append("\n");
         bodyStr.append("\t\t\t").append("return R.error(123, e);").append("\n");
         bodyStr.append("\t\t}").append("\n");
