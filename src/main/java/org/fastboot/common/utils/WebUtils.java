@@ -1,8 +1,11 @@
 package org.fastboot.common.utils;
 
+import cn.hutool.http.Method;
 import org.fastboot.common.dto.HeadDto;
+import org.fastboot.common.enums.ConstEnums;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,6 +21,10 @@ public class WebUtils {
 
     public static void buildResponse(HttpServletRequest request, HttpServletResponse response, Exception e) {
         try {
+            String encode = request.getCharacterEncoding();
+            String contentType = request.getContentType();
+            response.setCharacterEncoding(ToolsKit.isEmpty(encode) ? ConstEnums.COMMON.UTF8.getValue() : encode);
+            response.setContentType(ToolsKit.isEmpty(contentType) ? MediaType.APPLICATION_JSON_VALUE : contentType);
             PrintWriter out = response.getWriter();
             HeadDto headDto = ToolsKit.getThreadLocalDto();
             headDto.setCode(1);
