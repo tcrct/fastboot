@@ -213,10 +213,18 @@ public abstract class CurdService<T> implements ICurdService<T> {
                 query.groupBy(searchListDto.toGroupByStr());
             }
             query.limit(searchListDto.getPageNo(), searchListDto.getPageSize());
-            resultList = query.select();
+//            resultList = query.select();
             // todo... 由于指定多个列名时没有加上''号导致出错，暂注释掉，返回所有字段。待作者修复bug
-//            resultList = (null == searchListDto.getFieldList()) ? query.select() :
-//                    query.select(searchListDto.getFieldList().toArray(new String[]{}));
+            List<String> fieldList = searchListDto.getFieldList();
+            String[] newFieldArray = null;
+            if (null != fieldList) {
+                newFieldArray = new String[fieldList.size()];
+                for (int i=0; i<fieldList.size(); i++) {
+                    newFieldArray[i] = "`"+fieldList.get(i)+"`";
+                }
+            }
+            resultList = (null == newFieldArray) ? query.select() :
+                    query.select(newFieldArray);
         }
         pageDto.setAutoCount(true);
         pageDto.setResult(resultList);
