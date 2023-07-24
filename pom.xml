@@ -27,7 +27,7 @@
         <spring.version>5.2.8.RELEASE</spring.version>
         <hutool.version>5.3.5</hutool.version>
         <fastboot.version>1.0-SNAPSHOT</fastboot.version>
-        <unit.version>4.11</unit.version>
+        <unit.version>4.13.1</unit.version>
         <fst.version>2.29</fst.version>
         <cglib.version>3.1</cglib.version>
         <druid.version>1.1.22</druid.version>
